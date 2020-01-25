@@ -5,3 +5,9 @@ Developed by Anatoly Antonov ( github.com/awend0 ) for 9th Moscow State Universi
 # Dashboard
 ![Dashboard screenshot](https://github.com/awend0/CDH/raw/images/dashboard.jpg)
 
+# src
+created using Qt 5.14.0 and Qt Creator 4.11.0
+buid using MinGW 7.3.0 64-bit
+
+Jan'20
+

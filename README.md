@@ -1,2 +1,0 @@
-# CDH
-CanSat data handler

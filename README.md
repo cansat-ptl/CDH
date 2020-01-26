@@ -6,9 +6,7 @@ Created by Anatoly Antonov ( https://github.com/awend0 ) for the 9th Moscow Stat
 (randomized data)
 
 # Toolchain info:
-created using Qt 5.14.0 and Qt Creator 4.11.0
-
-build using MinGW 7.3.0 64-bit
+created using Qt 5.14.0 and Qt Creator 4.11.0 & build using MinGW 7.3.0 64-bit
 
 started Jan'20
 

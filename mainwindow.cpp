@@ -38,6 +38,17 @@ mainwindow::mainwindow(QWidget *parent) :
     tracker -> setParity(QSerialPort::NoParity);
     tracker -> setStopBits(QSerialPort::OneStop);
     tracker -> flush();
+
+    transceiver = new QSerialPort(this);
+
+    transceiver -> setPortName(portNameTrc);
+    transceiver -> open(QSerialPort::WriteOnly);
+    transceiver -> setBaudRate(baudRateTrc.toInt());
+    transceiver -> setDataBits(QSerialPort::Data8);
+    transceiver -> setFlowControl(QSerialPort::NoFlowControl);
+    transceiver -> setParity(QSerialPort::NoParity);
+    transceiver -> setStopBits(QSerialPort::OneStop);
+    transceiver -> flush();
 }
 
 void mainwindow::readSerial()
@@ -61,6 +72,8 @@ void mainwindow::updateData(QString s)
 {
    ui -> dashTerminal -> append("RCVD\n" + s + "\n");
    QString type = (QString)s[8] + (QString)s[9] + (QString)s[10] + (QString)s[11] + (QString)s[12] + (QString)s[13];
+   QString callsign = (QString)s[0] + (QString)s[1] + (QString)s[2] + (QString)s[3] + (QString)s[4] + (QString)s[5] + (QString)s[6];
+   ui -> callsign -> setText(callsign);
    if (type == "MAIN:N")
    {
         handleMain(s);
@@ -604,12 +617,19 @@ void mainwindow::on_pushButton_7_clicked()
     ui -> dashTerminal -> append("STNGS \nTracker port closed.\n");
 }
 
+void mainwindow::writeToTerminal(QString s)
+{
+    QByteArray ba = s.toLatin1();
+    transceiver -> write(ba);
+    ui -> dashTerminal -> append("SENT \n" + s.trimmed() + "\n");
+}
+
 void mainwindow::writeToTracker(QString angles)
 {
     angles.append( "\r");
     QByteArray ba = angles.toLatin1();
     tracker -> write(ba);
-    ui -> dashTerminal -> append("SENT \n" + angles.trimmed() + "\n");
+    ui -> dashTerminal -> append("TRCKR \n" + angles.trimmed() + "\n");
 }
 
 void mainwindow::changeflag(int flag, bool value)
@@ -780,11 +800,23 @@ void mainwindow::changeflag(int flag, bool value)
             }
             else
             {
+                ui -> flag14Label -> setText("False");
+                ui -> flag14Label -> setStyleSheet("QLabel { background-color : red; }");
+            }
+        break;
+        case 15:
+            if (value)
+            {
+                ui -> flag15Label -> setText("True");
+                ui -> flag15Label -> setStyleSheet("QLabel { background-color : green; }");
+            }
+            else
+            {
                 ui -> flag15Label -> setText("False");
                 ui -> flag15Label -> setStyleSheet("QLabel { background-color : red; }");
             }
         break;
-        case 15:
+        case 16:
             if (value)
             {
                 ui -> flag16Label -> setText("True");
@@ -794,18 +826,6 @@ void mainwindow::changeflag(int flag, bool value)
             {
                 ui -> flag16Label -> setText("False");
                 ui -> flag16Label -> setStyleSheet("QLabel { background-color : red; }");
-            }
-        break;
-        case 16:
-            if (value)
-            {
-                ui -> flag1Label -> setText("True");
-                ui -> flag1Label -> setStyleSheet("QLabel { background-color : green; }");
-            }
-            else
-            {
-                ui -> flag1Label -> setText("False");
-                ui -> flag1Label -> setStyleSheet("QLabel { background-color : red; }");
             }
         break;
 
@@ -826,4 +846,23 @@ void mainwindow::on_savePlotsButton_clicked()
     pAcc.save(".\\Images\\" + QString::number(pngCounter) + " acceleration.png","PNG");
 
     pngCounter++;
+}
+
+void mainwindow::on_reconnectTrcButton_clicked()
+{
+    transceiver -> close();
+    ui -> dashTerminal -> append("STNGS \nTransceiver port closed.\n");
+    portNameTrc = ui -> trcCOMEdit -> text();
+    baudRateTrc = ui -> trcBaudEdit -> text();
+    transceiver -> setPortName(portNameTrc);
+    transceiver -> setBaudRate(baudRateTrc.toInt());
+    transceiver -> open(QSerialPort::WriteOnly);
+    Sleep(uint(1000));
+    ui -> dashTerminal -> append("STNGS \nTransceiver port closed.\n");
+}
+
+void mainwindow::on_cmdButton_clicked()
+{
+    QString cmd = ui -> cmdEdit -> text();
+    writeToTerminal(cmd);
 }

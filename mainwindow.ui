@@ -77,7 +77,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>95 KPa</string>
+                 <string>0 KPa</string>
                 </property>
                </widget>
               </item>
@@ -112,7 +112,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>36 C°</string>
+                 <string>0 C°</string>
                 </property>
                </widget>
               </item>
@@ -150,7 +150,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>148 m</string>
+                 <string>0 m</string>
                 </property>
                </widget>
               </item>
@@ -185,7 +185,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>4.8 V</string>
+                 <string>0 V</string>
                 </property>
                </widget>
               </item>
@@ -301,7 +301,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>11,4 m/s²</string>
+                 <string>0 m/s²</string>
                 </property>
                </widget>
               </item>
@@ -336,7 +336,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>9,8 m/s²</string>
+                 <string>0 m/s²</string>
                 </property>
                </widget>
               </item>
@@ -371,7 +371,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>16,2 m/s²</string>
+                 <string>0 m/s²</string>
                 </property>
                </widget>
               </item>
@@ -432,7 +432,7 @@
                    <enum>QFrame::Box</enum>
                   </property>
                   <property name="text">
-                   <string>52.3 m</string>
+                   <string>0 m</string>
                   </property>
                  </widget>
                 </item>
@@ -469,7 +469,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>63.3°</string>
+                 <string>0°</string>
                 </property>
                </widget>
               </item>
@@ -504,7 +504,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>No</string>
+                 <string>-</string>
                 </property>
                </widget>
               </item>
@@ -539,7 +539,7 @@
                  <enum>QFrame::Box</enum>
                 </property>
                 <property name="text">
-                 <string>25.5°</string>
+                 <string>0°</string>
                 </property>
                </widget>
               </item>
@@ -599,7 +599,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Flag 1</string>
+         <string>INIT</string>
         </property>
        </widget>
       </item>
@@ -612,7 +612,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Flag 2</string>
+         <string>TIMER_SET</string>
         </property>
        </widget>
       </item>
@@ -625,7 +625,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Flag 3</string>
+         <string>TIMER_EN</string>
         </property>
        </widget>
       </item>
@@ -638,7 +638,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Flag 4</string>
+         <string>SD_INIT 3</string>
         </property>
        </widget>
       </item>
@@ -651,7 +651,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Flag 5</string>
+         <string>CSW_ALLOW</string>
         </property>
        </widget>
       </item>
@@ -664,7 +664,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Flag 6</string>
+         <string>REBOOT_WDT</string>
         </property>
        </widget>
       </item>
@@ -781,7 +781,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Flag 15</string>
+         <string>LOG_UART</string>
         </property>
        </widget>
       </item>
@@ -794,7 +794,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Flag 16</string>
+         <string>DEBUG</string>
         </property>
        </widget>
       </item>
@@ -1001,13 +1001,13 @@
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color : red</string>
+         <string notr="true">background-color : green</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
         <property name="text">
-         <string>False</string>
+         <string>True</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1025,13 +1025,13 @@
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color : red</string>
+         <string notr="true">background-color : green</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
         <property name="text">
-         <string>False</string>
+         <string>True</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1121,13 +1121,13 @@
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color : red</string>
+         <string notr="true">background-color : green</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
         <property name="text">
-         <string>False</string>
+         <string>True</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1145,13 +1145,13 @@
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color : red</string>
+         <string notr="true">background-color : green</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
         <property name="text">
-         <string>False</string>
+         <string>True</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1169,13 +1169,13 @@
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color : red</string>
+         <string notr="true">background-color : green</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
         <property name="text">
-         <string>False</string>
+         <string>True</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1237,7 +1237,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLabel" name="label_36">
+         <widget class="QLabel" name="callsign">
           <property name="font">
            <font>
             <family>Arial</family>
@@ -1306,7 +1306,7 @@
            </font>
           </property>
           <property name="text">
-           <string>11.12.2019 23:10</string>
+           <string>10.08.2019 23:10</string>
           </property>
          </widget>
         </item>
@@ -1379,7 +1379,7 @@
        <x>1550</x>
        <y>10</y>
        <width>351</width>
-       <height>491</height>
+       <height>451</height>
       </rect>
      </property>
     </widget>
@@ -1389,7 +1389,7 @@
        <x>1550</x>
        <y>520</y>
        <width>241</width>
-       <height>311</height>
+       <height>491</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -1420,97 +1420,6 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_40">
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Receiver baudrate</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_41">
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Receiver port</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_42">
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Tracker baudrate</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_43">
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Tracker port</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="label_44">
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Refresh rate</string>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="0" colspan="2">
-       <widget class="QPushButton" name="reconnectRecButton">
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Reconnect to receiver</string>
-        </property>
-       </widget>
-      </item>
-      <item row="14" column="0" colspan="2">
-       <widget class="QPushButton" name="pushButton_7">
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Reconnect to tracker</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
        <spacer name="verticalSpacer">
         <property name="orientation">
@@ -1523,6 +1432,32 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_40">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Receiver baud</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="receiverBaudEdit">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>9600</string>
+        </property>
+       </widget>
       </item>
       <item row="3" column="0">
        <spacer name="verticalSpacer_2">
@@ -1537,73 +1472,8 @@
         </property>
        </spacer>
       </item>
-      <item row="5" column="0">
-       <spacer name="verticalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>10</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="7" column="0">
-       <spacer name="verticalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>10</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="9" column="0">
-       <spacer name="verticalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>10</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="11" column="0">
-       <spacer name="verticalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="13" column="0">
-       <spacer name="verticalSpacer_7">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="16" column="0" colspan="2">
-       <widget class="QPushButton" name="pushButton_8">
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_41">
         <property name="font">
          <font>
           <family>Arial</family>
@@ -1611,33 +1481,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Do something</string>
-        </property>
-       </widget>
-      </item>
-      <item row="15" column="0">
-       <spacer name="verticalSpacer_8">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="receiverBaudEdit">
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>9600</string>
+         <string>Receiver port</string>
         </property>
        </widget>
       </item>
@@ -1654,6 +1498,32 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="0">
+       <spacer name="verticalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>10</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_42">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Tracker baudrate</string>
+        </property>
+       </widget>
+      </item>
       <item row="6" column="1">
        <widget class="QLineEdit" name="trackerBaudEdit">
         <property name="font">
@@ -1664,6 +1534,32 @@
         </property>
         <property name="text">
          <string>9600</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <spacer name="verticalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>10</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_43">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Tracker port</string>
         </property>
        </widget>
       </item>
@@ -1680,8 +1576,21 @@
         </property>
        </widget>
       </item>
-      <item row="10" column="1">
-       <widget class="QLineEdit" name="refreshEdit">
+      <item row="9" column="0">
+       <spacer name="verticalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>10</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="label_8">
         <property name="font">
          <font>
           <family>Arial</family>
@@ -1689,7 +1598,137 @@
          </font>
         </property>
         <property name="text">
-         <string>1</string>
+         <string>Transceiver baud</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <spacer name="verticalSpacer_12">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>10</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="12" column="0">
+       <widget class="QLabel" name="label_10">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Transceiver port</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <spacer name="verticalSpacer_13">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="14" column="0" colspan="2">
+       <widget class="QPushButton" name="reconnectRecButton">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Reconnect to receiver</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="0">
+       <spacer name="verticalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="16" column="0" colspan="2">
+       <widget class="QPushButton" name="pushButton_7">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Reconnect to tracker</string>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="0">
+       <spacer name="verticalSpacer_8">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="18" column="0" colspan="2">
+       <widget class="QPushButton" name="reconnectTrcButton">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Reconnect to transceiver</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QLineEdit" name="trcBaudEdit">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>9600</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="1">
+       <widget class="QLineEdit" name="trcCOMEdit">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>COM5</string>
         </property>
        </widget>
       </item>
@@ -1873,7 +1912,7 @@
     <widget class="QPushButton" name="savePlotsButton">
      <property name="geometry">
       <rect>
-       <x>1550</x>
+       <x>1560</x>
        <y>1020</y>
        <width>219</width>
        <height>26</height>
@@ -1887,6 +1926,35 @@
      </property>
      <property name="text">
       <string>Save plots</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="cmdEdit">
+     <property name="geometry">
+      <rect>
+       <x>1550</x>
+       <y>460</y>
+       <width>301</width>
+       <height>21</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdButton">
+     <property name="geometry">
+      <rect>
+       <x>1850</x>
+       <y>460</y>
+       <width>51</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>SEND</string>
      </property>
     </widget>
    </widget>

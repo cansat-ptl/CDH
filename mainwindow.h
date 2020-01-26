@@ -22,10 +22,12 @@ private:
     Ui::mainwindow *ui;
     QSerialPort *receiver;
     QSerialPort *tracker;
+    QSerialPort *transceiver;
     QFrame layoutsFrame;
     int pngCounter = 1;
 
     QString portNameR = "COM3", baudRateR = "9600", portNameT = "COM4", baudRateT = "9600";
+    QString portNameTrc = "COM5", baudRateTrc = "9600";
     QString latStation = "62.03389", lonStation = "129.73306", altStation = "85";
 
     int flgRaw = 0, nMain = 0, etMain = 0, vbatRaw = 0, altRawMain = 0, prsRaw = 0, t1Raw = 0, t2Raw = 0;
@@ -53,6 +55,9 @@ private slots:
     void writeToTracker(QString angles);
     void changeflag(int flag, bool value);
     void on_savePlotsButton_clicked();
+    void on_reconnectTrcButton_clicked();
+    void writeToTerminal(QString s);
+    void on_cmdButton_clicked();
 };
 
 #endif // MAINWINDOW_H

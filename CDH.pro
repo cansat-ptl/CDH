@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui serialport
+QT       += core gui serialport datavisualization 3dcore 3drender 3dinput 3dextras
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -28,10 +28,12 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
+        orbittransformcontroller.cpp \
         qcustomplot.cpp
 
 HEADERS += \
         mainwindow.h \
+        orbittransformcontroller.h \
         qcustomplot.h
 
 FORMS += \

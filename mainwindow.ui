@@ -205,10 +205,10 @@
            <widget class="QStackedWidget" name="mainStack">
             <property name="geometry">
              <rect>
-              <x>9</x>
+              <x>0</x>
               <y>29</y>
-              <width>601</width>
-              <height>291</height>
+              <width>615</width>
+              <height>290</height>
              </rect>
             </property>
             <property name="frameShape">
@@ -381,7 +381,63 @@
           </widget>
          </item>
          <item>
-          <widget class="QCustomPlot" name="orientPlot" native="true"/>
+          <widget class="QWidget" name="bckgroundWidget" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>615</width>
+             <height>320</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>615</width>
+             <height>320</height>
+            </size>
+           </property>
+           <widget class="QStackedWidget" name="orientStack">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>30</y>
+              <width>615</width>
+              <height>290</height>
+             </rect>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QCustomPlot" name="orientPlot"/>
+           </widget>
+           <widget class="QComboBox" name="comboBox_3">
+            <property name="geometry">
+             <rect>
+              <x>520</x>
+              <y>0</y>
+              <width>91</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <item>
+             <property name="text">
+              <string>Accelerations</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3D Model</string>
+             </property>
+            </item>
+           </widget>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -549,7 +605,57 @@
           </widget>
          </item>
          <item>
-          <widget class="QWidget" name="widget_3" native="true"/>
+          <widget class="QWidget" name="widget_3" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>615</width>
+             <height>320</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>615</width>
+             <height>320</height>
+            </size>
+           </property>
+           <widget class="QStackedWidget" name="gpsStack">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>30</y>
+              <width>615</width>
+              <height>290</height>
+             </rect>
+            </property>
+            <widget class="QWidget" name="page"/>
+           </widget>
+           <widget class="QComboBox" name="comboBox_2">
+            <property name="geometry">
+             <rect>
+              <x>510</x>
+              <y>0</y>
+              <width>101</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <item>
+             <property name="text">
+              <string>Trajectory</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Map</string>
+             </property>
+            </item>
+           </widget>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -1806,7 +1912,7 @@
          </font>
         </property>
         <property name="text">
-         <string>62.03389</string>
+         <string>61.659761</string>
         </property>
        </widget>
       </item>
@@ -1848,7 +1954,7 @@
          </font>
         </property>
         <property name="text">
-         <string>129.73306</string>
+         <string>129.388365</string>
         </property>
        </widget>
       </item>
@@ -1955,6 +2061,44 @@
      </property>
      <property name="text">
       <string>SEND</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="savePlotsButton_2">
+     <property name="geometry">
+      <rect>
+       <x>1830</x>
+       <y>1020</y>
+       <width>71</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="savePlotsButton_3">
+     <property name="geometry">
+      <rect>
+       <x>1830</x>
+       <y>990</y>
+       <width>71</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>...</string>
      </property>
     </widget>
    </widget>

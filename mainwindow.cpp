@@ -2,12 +2,13 @@
 #include "ui_mainwindow.h"
 #include <qcustomplot.h>
 
+
 mainwindow::mainwindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::mainwindow)
 {
+
     ui -> setupUi(this);
-    mainwindow::makePlot();
 
     // some design
     ui -> dashTerminal -> setReadOnly(1);
@@ -49,6 +50,25 @@ mainwindow::mainwindow(QWidget *parent) :
     transceiver -> setParity(QSerialPort::NoParity);
     transceiver -> setStopBits(QSerialPort::OneStop);
     transceiver -> flush();
+
+    trajPlot->setShadowQuality(QAbstract3DGraph::ShadowQualityNone);
+    trajPlot->addSeries(series);
+    series->setItemSize(0.06f);
+    ui->gpsStack->insertWidget(0, container);
+    container -> show();
+    container -> setGeometry(0,0,615,290);
+    QWidget temp;
+    ui->gpsStack->insertWidget(1, &temp);
+    temp.show();
+    trajPlot->axisY()->setTitle("Altitude");
+    trajPlot->axisX()->setTitle("Latitude");
+    trajPlot->axisZ()->setTitle("Longitude");
+    ui->gpsStack->widget(0)->show();
+    ui -> gpsStack -> setCurrentIndex(0);
+    ui -> orientStack -> setCurrentIndex(0);
+
+    mainwindow::makePlot();
+    mainwindow::render3D();
 }
 
 void mainwindow::readSerial()
@@ -76,7 +96,9 @@ void mainwindow::updateData(QString s)
    ui -> callsign -> setText(callsign);
    if (type == "MAIN:N")
    {
-        handleMain(s);
+        bool dmg = handleMain(s);
+        if (dmg)
+            ui -> dashTerminal -> append("DAMAGED!\n Packet number: " + QString::number(nMain));
         ui -> dashAltLabel -> setText(QString::number(altMain) + " m");
         ui -> dashPrsLabel -> setText(QString::number(prsMain) + " kPa");
         ui -> dashVbatLabel -> setText(QString::number(vbatMain) + " V");
@@ -113,8 +135,9 @@ void mainwindow::updateData(QString s)
    }
    if (type == "ORIENT")
    {
-        handleOrient(s);
-
+        bool dmg = handleOrient(s);
+        if (dmg)
+            ui -> dashTerminal -> append("DAMAGED!\n Packet number: " + QString::number(nOrient));
         ui -> dashAxLabel -> setText(QString::number(axOrient) + " m/s²");
         ui -> dashAyLabel -> setText(QString::number(ayOrient) + " m/s²");
         ui -> dashAzLabel -> setText(QString::number(azOrient) + " m/s²");
@@ -127,7 +150,9 @@ void mainwindow::updateData(QString s)
    }
    if (type == "GPS:N=")
    {
-        handleGPS(s);
+        bool dmg = handleGPS(s);
+        if (dmg)
+            ui -> dashTerminal -> append("DAMAGED!\n Packet number: " + QString::number(nGPS));
         double r1 = 6371200.0 + altStation.toDouble();
         double x1 = r1 * cos(latStation.toDouble()) * cos(lonStation.toDouble());
         double y1 = r1 * cos(latStation.toDouble()) * sin(lonStation.toDouble());
@@ -165,11 +190,11 @@ void mainwindow::updateData(QString s)
 
         int rndAlpha = (int)alpha, rndBeta = (int)beta;
         writeToTracker("A=" + QString::number(rndAlpha) + ";" + "B=" + QString::number(rndBeta) + ";");
-
+        updateScatter(latGPS, altGPS, lonGPS);
    }
 }
 
-void mainwindow::handleMain(QString s)
+bool mainwindow::handleMain(QString s)
 {
     int l = s.length();
     bool damaged = false;
@@ -314,9 +339,10 @@ void mainwindow::handleMain(QString s)
         }
     }
     vbatMain = (double)vbatRaw / 100.0, altMain = (double)altRawMain / 10.0, prsMain = (double)prsRaw / 1000.0, t1Main = (double)t1Raw / 10.0, t2Main = (double)t2Raw / 10.0;
+    return damaged;
 }
 
-void mainwindow::handleOrient(QString s)
+bool mainwindow::handleOrient(QString s)
 {
     int l = s.length();
     bool damaged = false;
@@ -403,9 +429,10 @@ void mainwindow::handleOrient(QString s)
         }
     }
     axOrient = (double)axRaw / 10.0 * 9.81, ayOrient = (double)ayRaw / 10.0 * 9.81, azOrient = (double)azRaw / 10.0 * 9.81;
+    return damaged;
 }
 
-void mainwindow::handleGPS(QString s)
+bool mainwindow::handleGPS(QString s)
 {
     // "YKTSAT5:GPS:N=12;ET=12;SAT=5;LAT=61.230;LON=129.154;ALT=200;\r\n"
     int l = s.length();
@@ -414,7 +441,7 @@ void mainwindow::handleGPS(QString s)
     int i = 0;
     for (i = 0; i < l; i++) {
         if (s[i] == '=') {
-            if (s[i - 1] == 'N') {
+            if (s[i - 1] == 'N' && s[i - 2] != 'O') {
                 while (s[i + 1] != ';') {
                     temp += s[i + 1];
                     i++;
@@ -478,9 +505,9 @@ void mainwindow::handleGPS(QString s)
                     }
                 }
             }
-        }
+        }  
         if (s[i] == '=') {
-            if (s[i - 1] == 'N') {
+            if(s[i - 1] == 'N'){
                 if (s[i - 2] == 'O') {
                     if (s[i - 3] == 'L') {
                         while (s[i + 1] != ';') {
@@ -493,6 +520,7 @@ void mainwindow::handleGPS(QString s)
                         }
                         lonGPS = temp.toDouble();
                         temp = "";
+
                     }
                 }
             }
@@ -517,6 +545,17 @@ void mainwindow::handleGPS(QString s)
         }
     }
     altGPS = (double)altRawGPS / 10.0;
+    return damaged;
+}
+
+void mainwindow::updateScatter(double x, double y, double z)
+{
+    QScatterDataItem item;
+    item.setX(x);
+    item.setY(y);
+    item.setZ(z);
+    proxy -> addItem(item);
+    container -> update();
 }
 
 void mainwindow::makePlot()
@@ -569,6 +608,12 @@ void mainwindow::makePlot()
 mainwindow::~mainwindow()
 {
     delete ui;
+}
+
+
+
+void mainwindow::render3D()
+{
 }
 
 void mainwindow::on_comboBox_currentIndexChanged(const QString &ind)
@@ -844,7 +889,9 @@ void mainwindow::on_savePlotsButton_clicked()
     pT.save(".\\Images\\" + QString::number(pngCounter) + " temperature.png","PNG");
     QPixmap pAcc = ui -> orientPlot -> grab();
     pAcc.save(".\\Images\\" + QString::number(pngCounter) + " acceleration.png","PNG");
-
+    ui->gpsStack->widget(0)->repaint();
+    QPixmap pTraj = ui->gpsStack->widget(0)->grab();
+    pTraj.save(".\\Images\\" + QString::number(pngCounter) + " trajectory.png","PNG");
     pngCounter++;
 }
 
@@ -866,3 +913,20 @@ void mainwindow::on_cmdButton_clicked()
     QString cmd = ui -> cmdEdit -> text();
     writeToTerminal(cmd);
 }
+
+void mainwindow::on_comboBox_2_activated(const QString &ind)
+{
+    if (ind == "Trajectory")
+        ui -> gpsStack -> setCurrentIndex(0);
+    if (ind == "Map")
+        ui -> gpsStack -> setCurrentIndex(1);
+}
+
+void mainwindow::on_comboBox_3_activated(const QString &ind)
+{
+    if (ind == "Accelerations")
+        ui -> orientStack -> setCurrentIndex(0);
+    else
+        ui -> orientStack -> setCurrentIndex(1);
+}
+

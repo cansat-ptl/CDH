@@ -28,12 +28,10 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        orbittransformcontroller.cpp \
         qcustomplot.cpp
 
 HEADERS += \
         mainwindow.h \
-        orbittransformcontroller.h \
         qcustomplot.h
 
 FORMS += \

@@ -2,7 +2,7 @@
 Created by Anatoly Antonov ( https://github.com/awend0 ) for the 9th Moscow State University Aerospace Engineering School 2020 (http://roscansat.com)
 
 # Dashboard
-![Dashboard screenshot](https://github.com/awend0/CDH/raw/images/dashboardscr.jpg)
+![Dashboard screenshot](https://github.com/awend0/CDH/raw/images/dashboard.jpg)
 (randomized data)
 
 # Toolchain info:

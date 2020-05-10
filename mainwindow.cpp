@@ -2,6 +2,16 @@
 #include "ui_mainwindow.h"
 #include <qcustomplot.h>
 
+bool ws_opened = 0, ws_m_collected = 0, ws_g_collected = 0, ws_o_collected = 0;
+int flgRaw = 0, nMain = 0, etMain = 0, vbatRaw = 0, altRawMain = 0, prsRaw = 0, t1Raw = 0, t2Raw = 0;
+int nOrient = 0, etOrient = 0, axRaw = 0, ayRaw = 0, azRaw = 0;
+int nGPS = 0, etGPS = 0, satGPS = 0, altRawGPS = 0, altGPS = 0;
+int pitchOrient = 0, yawOrient = 0, rollOrient = 0;
+double latGPS = 0, lonGPS = 0;
+double axOrient = 0, ayOrient = 0, azOrient = 0;
+double vbatMain = 0, altMain = 0, prsMain = 0, t1Main = 0, t2Main = 0;
+QString ws_token = "b7037fe6b012ae49d6c8189b60ca2c0b3f820950b27881755d034a676d3680f5";
+QWebSocket m_webSocket;
 
 mainwindow::mainwindow(QWidget *parent) :
     QMainWindow(parent),
@@ -9,6 +19,37 @@ mainwindow::mainwindow(QWidget *parent) :
 {
 
     ui -> setupUi(this);
+
+    auto *view = new Qt3DExtras::Qt3DWindow();
+    container3D = createWindowContainer(view,this);
+    Qt3DCore::QEntity *rootEntity = new Qt3DCore::QEntity;
+    Qt3DCore::QEntity *model = new Qt3DCore::QEntity(rootEntity);
+    Qt3DExtras::QPhongMaterial *material = new Qt3DExtras::QPhongMaterial();
+    material->setDiffuse(QColor(125, 125, 125));
+    Qt3DRender::QMesh *modelMesh = new Qt3DRender::QMesh;
+    QUrl data = QUrl::fromLocalFile("C:\\SRCS\\CDH\\model.stl");
+    modelMesh->setMeshName("Device model");
+    modelMesh->setSource(data);
+    Qt3DCore::QTransform *transform = new Qt3DCore::QTransform;
+    transform->setScale(0.1f);
+    model->addComponent(transform);
+    model->addComponent(modelMesh);
+    model->addComponent(material);
+    Qt3DRender::QCamera *camera = view -> camera();
+    camera->setViewCenter(QVector3D(5, 5, 1));
+    camera->setPosition(QVector3D(5,5,40.0f));
+    Qt3DCore::QEntity *lightEntity = new Qt3DCore::QEntity(rootEntity);
+    Qt3DRender::QPointLight *light = new Qt3DRender::QPointLight(lightEntity);
+    light->setColor("grey");
+    light->setIntensity(0.8f);
+    lightEntity->addComponent(light);
+    Qt3DCore::QTransform *lightTransform = new Qt3DCore::QTransform(lightEntity);
+    lightTransform->setTranslation(QVector3D(60, 0, 40.0f));
+    lightEntity->addComponent(lightTransform);
+    Qt3DExtras::QOrbitCameraController *camController = new
+    Qt3DExtras::QOrbitCameraController(rootEntity);
+    camController->setCamera(camera);
+    view -> setRootEntity(rootEntity);
 
     // some design
     ui -> dashTerminal -> setReadOnly(1);
@@ -54,9 +95,9 @@ mainwindow::mainwindow(QWidget *parent) :
     trajPlot -> setShadowQuality(QAbstract3DGraph::ShadowQualityNone);
     trajPlot -> addSeries(series);
     series -> setItemSize(0.06f);
-    ui -> gpsStack -> insertWidget(0, container);
-    container -> show();
-    container -> setGeometry(0,0,615,290);
+    ui -> gpsStack -> insertWidget(0, trajContainer);
+    trajContainer -> show();
+    trajContainer -> setGeometry(0,0,615,290);
     QWidget temp;
     ui -> gpsStack -> insertWidget(1, &temp);
     temp.show();
@@ -131,6 +172,8 @@ void mainwindow::updateData(QString s)
                 value = 1;
             changeflag(k + 1, value);
         }
+        ws_m_collected = 1;
+        sendMsg();
 
    }
    if (type == "ORIENT")
@@ -138,6 +181,7 @@ void mainwindow::updateData(QString s)
         bool dmg = handleOrient(s);
         if (dmg)
             ui -> dashTerminal -> append("DAMAGED!\n Packet number: " + QString::number(nOrient));
+
         ui -> dashAxLabel -> setText(QString::number(axOrient) + " m/s²");
         ui -> dashAyLabel -> setText(QString::number(ayOrient) + " m/s²");
         ui -> dashAzLabel -> setText(QString::number(azOrient) + " m/s²");
@@ -147,6 +191,8 @@ void mainwindow::updateData(QString s)
         ui -> orientPlot -> graph(2) -> addData(etOrient, azOrient);
         ui -> orientPlot -> rescaleAxes();
         ui -> orientPlot -> replot();
+        ws_o_collected = 1;
+        sendMsg();
    }
    if (type == "GPS:N=")
    {
@@ -191,6 +237,8 @@ void mainwindow::updateData(QString s)
         int rndAlpha = (int)alpha, rndBeta = (int)beta;
         writeToTracker("A=" + QString::number(rndAlpha) + ";" + "B=" + QString::number(rndBeta) + ";");
         updateScatter(latGPS, altGPS, lonGPS);
+        ws_g_collected = 1;
+        sendMsg();
    }
 }
 
@@ -427,6 +475,54 @@ bool mainwindow::handleOrient(QString s)
                 }
             }
         }
+        if (s[i] == '=') {
+            if (s[i - 1] == 'H') {
+                if (s[i - 2] == 'C') {
+                    while (s[i + 1] != ';') {
+                        temp += s[i + 1];
+                        i++;
+                        if (i > l) {
+                            damaged = true;
+                            break;
+                        }
+                    }
+                    pitchOrient = temp.toInt() / 10.0;
+                    temp = "";
+                }
+            }
+        }
+        if (s[i] == '=') {
+            if (s[i - 1] == 'W') {
+                if (s[i - 2] == 'A') {
+                    while (s[i + 1] != ';') {
+                        temp += s[i + 1];
+                        i++;
+                        if (i > l) {
+                            damaged = true;
+                            break;
+                        }
+                    }
+                    yawOrient = temp.toInt() / 10.0;
+                    temp = "";
+                }
+            }
+        }
+        if (s[i] == '=') {
+            if (s[i - 1] == 'L') {
+                if (s[i - 2] == 'L') {
+                    while (s[i + 1] != ';') {
+                        temp += s[i + 1];
+                        i++;
+                        if (i > l) {
+                            damaged = true;
+                            break;
+                        }
+                    }
+                    rollOrient = temp.toInt() / 10.0;
+                    temp = "";
+                }
+            }
+        }
     }
     axOrient = (double)axRaw / 10.0 * 9.81, ayOrient = (double)ayRaw / 10.0 * 9.81, azOrient = (double)azRaw / 10.0 * 9.81;
     return damaged;
@@ -555,7 +651,7 @@ void mainwindow::updateScatter(double x, double y, double z)
     item.setY(y);
     item.setZ(z);
     proxy -> addItem(item);
-    container -> update();
+    trajContainer -> update();
 }
 
 void mainwindow::makePlot()
@@ -611,50 +707,20 @@ mainwindow::~mainwindow()
 }
 
 
+void mainwindow::resizeView(QSize size)
+{
+    container3D -> resize(size);
+}
+
+void mainwindow::resizeEvent(QResizeEvent * )
+{
+    resizeView(this->size());
+}
 
 void mainwindow::render3D()
 {
-    Qt3DExtras::Qt3DWindow* view = new Qt3DExtras::Qt3DWindow;
-
-    Qt3DCore::QEntity *rootEntity = new Qt3DCore::QEntity;
-    Qt3DCore::QEntity *model = new Qt3DCore::QEntity(rootEntity);
-
-    Qt3DExtras::QPhongMaterial *material = new Qt3DExtras::QPhongMaterial();
-    material -> setDiffuse(QColor(125, 125, 125));
-
-    Qt3DRender::QMesh *modelMesh = new Qt3DRender::QMesh;
-    QUrl data = QUrl::fromLocalFile("C:\\CDH\\model.stl");
-    modelMesh -> setMeshName("Device model");
-    modelMesh -> setSource(data);
-    model -> addComponent(modelMesh);
-    model -> addComponent(material);
-
-    Qt3DRender::QCamera *camera = view -> camera();
-    camera -> lens() -> setPerspectiveProjection(40.0f, 16.0f/9.0f, 0.1f, 1000.0f);
-    camera -> setPosition(QVector3D(0, 0, 40.0f));
-    camera -> setViewCenter(QVector3D(0, 0, 0));
-
-    Qt3DCore::QEntity *lightEntity = new Qt3DCore::QEntity(rootEntity);
-    Qt3DRender::QPointLight *light = new Qt3DRender::QPointLight(lightEntity);
-    light -> setColor("black");
-    light -> setIntensity(0.8f);
-    lightEntity -> addComponent(light);
-
-    Qt3DCore::QTransform *lightTransform = new Qt3DCore::QTransform(lightEntity);
-    lightTransform -> setTranslation(QVector3D(60, 0, 40.0f));
-    lightEntity -> addComponent(lightTransform);
-
-    Qt3DExtras::QOrbitCameraController *camController = new
-    Qt3DExtras::QOrbitCameraController(rootEntity);
-    camController -> setCamera(camera);
-    view -> setRootEntity(rootEntity);
-    view -> show();
-
-    QWidget *w = QWidget::createWindowContainer(view);
-
-    ui -> orientStack -> insertWidget(1,w);
+    ui->orientStack->insertWidget(1, container3D);
 }
-
 void mainwindow::on_comboBox_currentIndexChanged(const QString &ind)
 {
     if (ind == "Altitude")
@@ -969,3 +1035,30 @@ void mainwindow::on_comboBox_3_activated(const QString &ind)
         ui -> orientStack -> setCurrentIndex(1);
 }
 
+EchoClient::EchoClient(const QUrl &url, bool debug, QObject *parent) :
+    QObject(parent),
+    m_url(url),
+    m_debug(debug)
+{
+    connect(&m_webSocket, &QWebSocket::connected, this, &EchoClient::onConnected);
+    connect(&m_webSocket, &QWebSocket::disconnected, this, &EchoClient::closed);
+    m_webSocket.open(QUrl(url));
+}
+
+void EchoClient::onConnected()
+{
+    ws_opened = 1;
+}
+
+void mainwindow::sendMsg()
+{
+    int bs = 0;
+//m_webSocket.sendTextMessage(QStringLiteral("{\"token\" : \"TOKEN\", \"vbat\": VBAT, \"prs\": PRS, \"t1\": T1, \"t2\" : T2, \"f\": FLG, \"ax\": AX, \"ay\": AY, \"az\": AZ, \"pitch\" : PITCH, \"yaw\" : YAW, \"roll\": ROLL, \"alt\" : ALT, \"lat\" : LAT, \"lon\": LON}"));
+    QString msg = "{\"token\" : \"" + ws_token + "\", \"vbat\": " + QString::number(vbatMain) + ", \"prs\": " + QString::number(prsMain) + ", \"t1\": " + QString::number(t1Main) + ", \"t2\" : " + QString::number(t2Main) + ", \"f\": " + QString::number(flgRaw) + ", \"ax\": " + QString::number(axOrient) + ", \"ay\": " + QString::number(ayOrient) + ", \"az\": " + QString::number(azOrient) + ", \"pitch\" : " + QString::number(pitchOrient) + ", \"yaw\" : " + QString::number(yawOrient) + ", \"roll\": " + QString::number(rollOrient) + ", \"alt\" : " + QString::number(altMain) + ", \"lat\" : " + QString::number(latGPS) + ", \"lon\": " + QString::number(lonGPS) + "}";
+    if (ws_opened == 1 && ws_m_collected == 1 && ws_o_collected == 1 && ws_g_collected == 1)
+    {
+        bs = m_webSocket.sendTextMessage(msg);
+        ws_m_collected = 0; ws_o_collected = 0; ws_g_collected = 0;
+        writeToTerminal("Message send, bytes send: " + QString::number(bs));
+    }
+}

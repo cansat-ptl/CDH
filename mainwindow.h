@@ -6,16 +6,41 @@
 #include <QSerialPort>
 #include <QByteArray>
 #include <QtDataVisualization>
-#include <Qt3DInput>
-#include <Qt3DExtras>
-#include <Qt3DRender>
 #include <Qt3DCore>
+#include <Qt3DRender>
+#include <Qt3DInput>
+#include <Qt3DLogic>
+#include <Qt3DExtras>
+#include <Qt3DAnimation>
+#include <QtWebSockets/QtWebSockets>
+#include <QtWebSockets/QWebSocket>
+#include <QtCore/QObject>
+#include <QtCore/QList>
 
 using namespace QtDataVisualization;
+
 
 namespace Ui {
 class mainwindow;
 }
+
+class EchoClient : public QObject
+{
+    Q_OBJECT
+public:
+    explicit EchoClient(const QUrl &url, bool debug, QObject *parent = nullptr);
+    QUrl m_url;
+    bool m_debug;
+
+
+Q_SIGNALS:
+    void closed();
+
+
+private Q_SLOTS:
+    void onConnected();
+
+};
 
 class mainwindow : public QMainWindow
 {
@@ -25,12 +50,20 @@ public:
     explicit mainwindow(QWidget *parent = nullptr);
     ~mainwindow();
     Q3DScatter *trajPlot = new Q3DScatter();
-    QWidget *container = QWidget::createWindowContainer(trajPlot);
+
+    QWidget *trajContainer = QWidget::createWindowContainer(trajPlot);
     QScatterDataProxy *proxy = new QScatterDataProxy;
     QScatter3DSeries *series = new QScatter3DSeries(proxy);
 
+public slots:
+    void resizeView(QSize size);
+
+Q_SIGNALS:
+
+
 private:
     Ui::mainwindow *ui;
+    QWidget *container3D;
     QSerialPort *receiver;
     QSerialPort *tracker;
     QSerialPort *transceiver;
@@ -42,18 +75,15 @@ private:
     QString latStation = "61.659761", lonStation = "129.388365", altStation = "85";
 
     int seriesIt = 0;
-    int flgRaw = 0, nMain = 0, etMain = 0, vbatRaw = 0, altRawMain = 0, prsRaw = 0, t1Raw = 0, t2Raw = 0;
-    int nOrient = 0, etOrient = 0, axRaw = 0, ayRaw = 0, azRaw = 0;
-    int nGPS = 0, etGPS = 0, satGPS = 0, altRawGPS = 0, altGPS = 0;
-    double latGPS = 0, lonGPS = 0;
-    double axOrient = 0, ayOrient = 0, azOrient = 0;
-    double vbatMain = 0, altMain = 0, prsMain = 0, t1Main = 0, t2Main = 0;
+
+
 
     QByteArray serialData;
     QString serialBuffer;
     QString parsedData;
 
 private slots:
+    void render3D();
     void readSerial();
     void updateData(QString);
     void makePlot();
@@ -73,7 +103,12 @@ private slots:
     void on_comboBox_2_activated(const QString &arg1);
     void updateScatter(double x, double y, double z);
     void on_comboBox_3_activated(const QString &arg1);
-    void render3D();
+    void sendMsg();
+
+
+protected:
+    void resizeEvent(QResizeEvent *event);
 };
+
 
 #endif // MAINWINDOW_H

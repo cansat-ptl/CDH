@@ -2,17 +2,6 @@
 #include "ui_mainwindow.h"
 #include <qcustomplot.h>
 
-bool ws_opened = 0, ws_m_collected = 0, ws_g_collected = 0, ws_o_collected = 0;
-int flgRaw = 0, nMain = 0, etMain = 0, vbatRaw = 0, altRawMain = 0, prsRaw = 0, t1Raw = 0, t2Raw = 0;
-int nOrient = 0, etOrient = 0, axRaw = 0, ayRaw = 0, azRaw = 0;
-int nGPS = 0, etGPS = 0, satGPS = 0, altRawGPS = 0, altGPS = 0;
-int pitchOrient = 0, yawOrient = 0, rollOrient = 0;
-double latGPS = 0, lonGPS = 0;
-double axOrient = 0, ayOrient = 0, azOrient = 0;
-double vbatMain = 0, altMain = 0, prsMain = 0, t1Main = 0, t2Main = 0;
-QString ws_token = "b7037fe6b012ae49d6c8189b60ca2c0b3f820950b27881755d034a676d3680f5";
-QWebSocket m_webSocket;
-
 mainwindow::mainwindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::mainwindow)
@@ -20,17 +9,22 @@ mainwindow::mainwindow(QWidget *parent) :
 
     ui -> setupUi(this);
 
+    // 3D
     auto *view = new Qt3DExtras::Qt3DWindow();
     container3D = createWindowContainer(view,this);
     Qt3DCore::QEntity *rootEntity = new Qt3DCore::QEntity;
     Qt3DCore::QEntity *model = new Qt3DCore::QEntity(rootEntity);
+
+    td_drawLine({ 0, 0, 0 }, { 10000, 0, 0 }, Qt::red, rootEntity); // X
+    td_drawLine({ 0, 0, 0 }, { 0, 10000, 0 }, Qt::green, rootEntity); // Y
+    td_drawLine({ 0, 0, 0 }, { 0, 0, 10000 }, Qt::blue, rootEntity); // Z
     Qt3DExtras::QPhongMaterial *material = new Qt3DExtras::QPhongMaterial();
     material->setDiffuse(QColor(125, 125, 125));
     Qt3DRender::QMesh *modelMesh = new Qt3DRender::QMesh;
     QUrl data = QUrl::fromLocalFile("C:\\SRCS\\CDH\\model.stl");
     modelMesh->setMeshName("Device model");
     modelMesh->setSource(data);
-    Qt3DCore::QTransform *transform = new Qt3DCore::QTransform;
+
     transform->setScale(0.1f);
     model->addComponent(transform);
     model->addComponent(modelMesh);
@@ -68,7 +62,7 @@ mainwindow::mainwindow(QWidget *parent) :
     receiver -> setParity(QSerialPort::NoParity);
     receiver -> setStopBits(QSerialPort::OneStop);
     receiver -> flush();
-    QObject::connect(receiver, SIGNAL(readyRead()), this, SLOT(readSerial()));
+    QObject::connect(receiver, SIGNAL(readyRead()), this, SLOT(h_readSerial()));
 
     tracker = new QSerialPort(this);
 
@@ -92,6 +86,7 @@ mainwindow::mainwindow(QWidget *parent) :
     transceiver -> setStopBits(QSerialPort::OneStop);
     transceiver -> flush();
 
+    // 3D trajectory scatter
     trajPlot -> setShadowQuality(QAbstract3DGraph::ShadowQualityNone);
     trajPlot -> addSeries(series);
     series -> setItemSize(0.06f);
@@ -108,11 +103,68 @@ mainwindow::mainwindow(QWidget *parent) :
     ui -> gpsStack -> setCurrentIndex(0);
     ui -> orientStack -> setCurrentIndex(0);
 
-    mainwindow::makePlot();
-    mainwindow::render3D();
+    init_data_plots(); init_3D_render(); init_WebSocket_connection();
 }
 
-void mainwindow::readSerial()
+void mainwindow::td_drawLine(const QVector3D& start, const QVector3D& end, const QColor& color, Qt3DCore::QEntity *_rootEntity)
+{
+    auto *geometry = new Qt3DRender::QGeometry(_rootEntity);
+
+    // position vertices (start and end)
+    QByteArray bufferBytes;
+    bufferBytes.resize(3 * 2 * sizeof(float)); // start.x, start.y, start.end + end.x, end.y, end.z
+    float *positions = reinterpret_cast<float*>(bufferBytes.data());
+    *positions++ = start.x();
+    *positions++ = start.y();
+    *positions++ = start.z();
+    *positions++ = end.x();
+    *positions++ = end.y();
+    *positions++ = end.z();
+
+    auto *buf = new Qt3DRender::QBuffer(geometry);
+    buf->setData(bufferBytes);
+
+    auto *positionAttribute = new Qt3DRender::QAttribute(geometry);
+    positionAttribute->setName(Qt3DRender::QAttribute::defaultPositionAttributeName());
+    positionAttribute->setVertexBaseType(Qt3DRender::QAttribute::Float);
+    positionAttribute->setVertexSize(3);
+    positionAttribute->setAttributeType(Qt3DRender::QAttribute::VertexAttribute);
+    positionAttribute->setBuffer(buf);
+    positionAttribute->setByteStride(3 * sizeof(float));
+    positionAttribute->setCount(2);
+    geometry->addAttribute(positionAttribute); // We add the vertices in the geometry
+
+    // connectivity between vertices
+    QByteArray indexBytes;
+    indexBytes.resize(2 * sizeof(unsigned int)); // start to end
+    unsigned int *indices = reinterpret_cast<unsigned int*>(indexBytes.data());
+    *indices++ = 0;
+    *indices++ = 1;
+
+    auto *indexBuffer = new Qt3DRender::QBuffer(geometry);
+    indexBuffer->setData(indexBytes);
+
+    auto *indexAttribute = new Qt3DRender::QAttribute(geometry);
+    indexAttribute->setVertexBaseType(Qt3DRender::QAttribute::UnsignedInt);
+    indexAttribute->setAttributeType(Qt3DRender::QAttribute::IndexAttribute);
+    indexAttribute->setBuffer(indexBuffer);
+    indexAttribute->setCount(2);
+    geometry->addAttribute(indexAttribute); // We add the indices linking the points in the geometry
+
+    // mesh
+    auto *line = new Qt3DRender::QGeometryRenderer(_rootEntity);
+    line->setGeometry(geometry);
+    line->setPrimitiveType(Qt3DRender::QGeometryRenderer::Lines);
+    auto *material = new Qt3DExtras::QPhongMaterial(_rootEntity);
+    material->setAmbient(color);
+
+    // entity
+    auto *lineEntity = new Qt3DCore::QEntity(_rootEntity);
+    lineEntity->addComponent(line);
+    lineEntity->addComponent(material);
+}
+
+void mainwindow::h_readSerial()
 {
     QStringList bufferSplit = serialBuffer.split("\n");
     if(bufferSplit.length() < 2)
@@ -125,11 +177,11 @@ void mainwindow::readSerial()
     {
         serialBuffer = "";
         parsedData = bufferSplit[0];
-        mainwindow::updateData(parsedData.trimmed());
+        mainwindow::h_updateData(parsedData.trimmed());
     }
 }
 
-void mainwindow::updateData(QString s)
+void mainwindow::h_updateData(QString s)
 {
    ui -> dashTerminal -> append("RCVD\n" + s + "\n");
    QString type = (QString)s[8] + (QString)s[9] + (QString)s[10] + (QString)s[11] + (QString)s[12] + (QString)s[13];
@@ -137,7 +189,7 @@ void mainwindow::updateData(QString s)
    ui -> callsign -> setText(callsign);
    if (type == "MAIN:N")
    {
-        bool dmg = handleMain(s);
+        bool dmg = h_handleMain(s);
         if (dmg)
             ui -> dashTerminal -> append("DAMAGED!\n Packet number: " + QString::number(nMain));
         ui -> dashAltLabel -> setText(QString::number(altMain) + " m");
@@ -162,7 +214,7 @@ void mainwindow::updateData(QString s)
         ui -> tPlot -> rescaleAxes();
         ui -> tPlot -> replot();
 
-        QString flagsMain = QString("%1").arg(flgRaw,0,2);
+        QString flagsMain = QString("%1").arg(flgMain,0,2);
         boolean value = 0;
         for (int k = 0; k < flagsMain.length(); k++)
         {
@@ -170,15 +222,15 @@ void mainwindow::updateData(QString s)
                 value = 0;
             if (flagsMain[k] == '1')
                 value = 1;
-            changeflag(k + 1, value);
+            d_changeFlag(k + 1, value);
         }
         ws_m_collected = 1;
-        sendMsg();
+        ws_sendMsg();
 
    }
    if (type == "ORIENT")
    {
-        bool dmg = handleOrient(s);
+        bool dmg = h_handleOrient(s);
         if (dmg)
             ui -> dashTerminal -> append("DAMAGED!\n Packet number: " + QString::number(nOrient));
 
@@ -192,11 +244,11 @@ void mainwindow::updateData(QString s)
         ui -> orientPlot -> rescaleAxes();
         ui -> orientPlot -> replot();
         ws_o_collected = 1;
-        sendMsg();
+        ws_sendMsg();
    }
    if (type == "GPS:N=")
    {
-        bool dmg = handleGPS(s);
+        bool dmg = h_handleGPS(s);
         if (dmg)
             ui -> dashTerminal -> append("DAMAGED!\n Packet number: " + QString::number(nGPS));
         double r1 = 6371200.0 + altStation.toDouble();
@@ -235,14 +287,15 @@ void mainwindow::updateData(QString s)
         ui -> distLabel -> setText(QString::number(d) + " m");
 
         int rndAlpha = (int)alpha, rndBeta = (int)beta;
-        writeToTracker("A=" + QString::number(rndAlpha) + ";" + "B=" + QString::number(rndBeta) + ";");
-        updateScatter(latGPS, altGPS, lonGPS);
+        cmd_writeToTracker("A=" + QString::number(rndAlpha) + ";" + "B=" + QString::number(rndBeta) + ";");
+        d_updateScatter(latGPS, altGPS, lonGPS);
         ws_g_collected = 1;
-        sendMsg();
+        transform->setRotationX(pitchOrient); transform->setRotationY(yawOrient); transform->setRotationZ(rollOrient);
+        ws_sendMsg();
    }
 }
 
-bool mainwindow::handleMain(QString s)
+bool mainwindow::h_handleMain(QString s)
 {
     int l = s.length();
     bool damaged = false;
@@ -292,7 +345,7 @@ bool mainwindow::handleMain(QString s)
                                     break;
                                 }
                             }
-                            vbatRaw = temp.toInt();
+                            vbatMain = temp.toDouble()/100.0;
                             temp = "";
                         }
                     }
@@ -311,7 +364,7 @@ bool mainwindow::handleMain(QString s)
                                 break;
                             }
                         }
-                        altRawMain = temp.toInt();
+                        altMain = temp.toDouble() / 10.0;
                         temp = "";
                     }
                 }
@@ -329,7 +382,7 @@ bool mainwindow::handleMain(QString s)
                                 break;
                             }
                         }
-                        prsRaw = temp.toInt();
+                        prsMain = temp.toDouble() / 1000.0;
                         temp = "";
                     }
                 }
@@ -346,7 +399,7 @@ bool mainwindow::handleMain(QString s)
                             break;
                         }
                     }
-                    t1Raw = temp.toInt();
+                    t1Main = temp.toDouble() / 10.0;
                     temp = "";
                 }
             }
@@ -362,7 +415,7 @@ bool mainwindow::handleMain(QString s)
                             break;
                         }
                     }
-                    t2Raw = temp.toInt();
+                    t2Main = temp.toDouble() / 10.0;
                     temp = "";
                 }
             }
@@ -379,18 +432,17 @@ bool mainwindow::handleMain(QString s)
                                 break;
                             }
                         }
-                        flgRaw = temp.toInt();
+                        flgMain = temp.toInt();
                         temp = "";
                     }
                 }
             }
         }
     }
-    vbatMain = (double)vbatRaw / 100.0, altMain = (double)altRawMain / 10.0, prsMain = (double)prsRaw / 1000.0, t1Main = (double)t1Raw / 10.0, t2Main = (double)t2Raw / 10.0;
     return damaged;
 }
 
-bool mainwindow::handleOrient(QString s)
+bool mainwindow::h_handleOrient(QString s)
 {
     int l = s.length();
     bool damaged = false;
@@ -438,7 +490,7 @@ bool mainwindow::handleOrient(QString s)
                             break;
                         }
                     }
-                    axRaw = temp.toInt();
+                    axOrient = temp.toDouble() / 10.0 * 9.81;
                     temp = "";
                 }
             }
@@ -454,7 +506,7 @@ bool mainwindow::handleOrient(QString s)
                             break;
                         }
                     }
-                    ayRaw = temp.toInt();
+                    ayOrient = temp.toDouble() / 10.0 * 9.81;
                     temp = "";
                 }
             }
@@ -470,7 +522,7 @@ bool mainwindow::handleOrient(QString s)
                             break;
                         }
                     }
-                    azRaw = temp.toInt();
+                    azOrient = temp.toDouble() / 10.0 * 9.81;
                     temp = "";
                 }
             }
@@ -486,7 +538,7 @@ bool mainwindow::handleOrient(QString s)
                             break;
                         }
                     }
-                    pitchOrient = temp.toInt() / 10.0;
+                    pitchOrient = temp.toDouble() / 10.0;
                     temp = "";
                 }
             }
@@ -502,7 +554,7 @@ bool mainwindow::handleOrient(QString s)
                             break;
                         }
                     }
-                    yawOrient = temp.toInt() / 10.0;
+                    yawOrient = temp.toDouble() / 10.0;
                     temp = "";
                 }
             }
@@ -518,19 +570,17 @@ bool mainwindow::handleOrient(QString s)
                             break;
                         }
                     }
-                    rollOrient = temp.toInt() / 10.0;
+                    rollOrient = temp.toDouble() / 10.0;
                     temp = "";
                 }
             }
         }
     }
-    axOrient = (double)axRaw / 10.0 * 9.81, ayOrient = (double)ayRaw / 10.0 * 9.81, azOrient = (double)azRaw / 10.0 * 9.81;
     return damaged;
 }
 
-bool mainwindow::handleGPS(QString s)
+bool mainwindow::h_handleGPS(QString s)
 {
-    // "YKTSAT5:GPS:N=12;ET=12;SAT=5;LAT=61.230;LON=129.154;ALT=200;\r\n"
     int l = s.length();
     bool damaged = false;
     QString temp = "";
@@ -633,18 +683,17 @@ bool mainwindow::handleGPS(QString s)
                                 break;
                             }
                         }
-                        altRawGPS = temp.toInt();
+                        altGPS = temp.toDouble() / 10.0;
                         temp = "";
                     }
                 }
             }
         }
     }
-    altGPS = (double)altRawGPS / 10.0;
     return damaged;
 }
 
-void mainwindow::updateScatter(double x, double y, double z)
+void mainwindow::d_updateScatter(double x, double y, double z)
 {
     QScatterDataItem item;
     item.setX(x);
@@ -654,7 +703,7 @@ void mainwindow::updateScatter(double x, double y, double z)
     trajContainer -> update();
 }
 
-void mainwindow::makePlot()
+void mainwindow::init_data_plots()
 {
     ui -> altPlot -> addGraph();
     ui -> altPlot -> xAxis -> setLabel("seconds");
@@ -706,21 +755,21 @@ mainwindow::~mainwindow()
     delete ui;
 }
 
-
 void mainwindow::resizeView(QSize size)
 {
     container3D -> resize(size);
 }
 
-void mainwindow::resizeEvent(QResizeEvent * )
+void mainwindow::td_resizeEvent(QResizeEvent * )
 {
     resizeView(this->size());
 }
 
-void mainwindow::render3D()
+void mainwindow::init_3D_render()
 {
     ui->orientStack->insertWidget(1, container3D);
 }
+
 void mainwindow::on_comboBox_currentIndexChanged(const QString &ind)
 {
     if (ind == "Altitude")
@@ -767,14 +816,14 @@ void mainwindow::on_pushButton_7_clicked()
     ui -> dashTerminal -> append("STNGS \nTracker port closed.\n");
 }
 
-void mainwindow::writeToTerminal(QString s)
+void mainwindow::cmd_writeToTerminal(QString s)
 {
     QByteArray ba = s.toLatin1();
     transceiver -> write(ba);
     ui -> dashTerminal -> append("SENT \n" + s.trimmed() + "\n");
 }
 
-void mainwindow::writeToTracker(QString angles)
+void mainwindow::cmd_writeToTracker(QString angles)
 {
     angles.append( "\r");
     QByteArray ba = angles.toLatin1();
@@ -782,7 +831,7 @@ void mainwindow::writeToTracker(QString angles)
     ui -> dashTerminal -> append("TRCKR \n" + angles.trimmed() + "\n");
 }
 
-void mainwindow::changeflag(int flag, bool value)
+void mainwindow::d_changeFlag(int flag, bool value)
 {
     switch (flag)
     {
@@ -1016,7 +1065,7 @@ void mainwindow::on_reconnectTrcButton_clicked()
 void mainwindow::on_cmdButton_clicked()
 {
     QString cmd = ui -> cmdEdit -> text();
-    writeToTerminal(cmd);
+    cmd_writeToTerminal(cmd);
 }
 
 void mainwindow::on_comboBox_2_activated(const QString &ind)
@@ -1035,30 +1084,26 @@ void mainwindow::on_comboBox_3_activated(const QString &ind)
         ui -> orientStack -> setCurrentIndex(1);
 }
 
-EchoClient::EchoClient(const QUrl &url, bool debug, QObject *parent) :
-    QObject(parent),
-    m_url(url),
-    m_debug(debug)
-{
-    connect(&m_webSocket, &QWebSocket::connected, this, &EchoClient::onConnected);
-    connect(&m_webSocket, &QWebSocket::disconnected, this, &EchoClient::closed);
-    m_webSocket.open(QUrl(url));
-}
-
-void EchoClient::onConnected()
+void mainwindow::ws_onConnected()
 {
     ws_opened = 1;
+    ui -> dashTerminal -> append("WEBSOCKET \nConnected.\n");
 }
 
-void mainwindow::sendMsg()
+void mainwindow::ws_sendMsg()
 {
     int bs = 0;
-//m_webSocket.sendTextMessage(QStringLiteral("{\"token\" : \"TOKEN\", \"vbat\": VBAT, \"prs\": PRS, \"t1\": T1, \"t2\" : T2, \"f\": FLG, \"ax\": AX, \"ay\": AY, \"az\": AZ, \"pitch\" : PITCH, \"yaw\" : YAW, \"roll\": ROLL, \"alt\" : ALT, \"lat\" : LAT, \"lon\": LON}"));
-    QString msg = "{\"token\" : \"" + ws_token + "\", \"vbat\": " + QString::number(vbatMain) + ", \"prs\": " + QString::number(prsMain) + ", \"t1\": " + QString::number(t1Main) + ", \"t2\" : " + QString::number(t2Main) + ", \"f\": " + QString::number(flgRaw) + ", \"ax\": " + QString::number(axOrient) + ", \"ay\": " + QString::number(ayOrient) + ", \"az\": " + QString::number(azOrient) + ", \"pitch\" : " + QString::number(pitchOrient) + ", \"yaw\" : " + QString::number(yawOrient) + ", \"roll\": " + QString::number(rollOrient) + ", \"alt\" : " + QString::number(altMain) + ", \"lat\" : " + QString::number(latGPS) + ", \"lon\": " + QString::number(lonGPS) + "}";
+    QString msg = "{\"token\" : \"" + ws_token + "\", \"vbat\": " + QString::number(vbatMain) + ", \"prs\": " + QString::number(prsMain) + ", \"t1\": " + QString::number(t1Main) + ", \"t2\" : " + QString::number(t2Main) + ", \"f\": " + QString::number(flgMain) + ", \"ax\": " + QString::number(axOrient) + ", \"ay\": " + QString::number(ayOrient) + ", \"az\": " + QString::number(azOrient) + ", \"pitch\" : " + QString::number(pitchOrient) + ", \"yaw\" : " + QString::number(yawOrient) + ", \"roll\": " + QString::number(rollOrient) + ", \"alt\" : " + QString::number(altMain) + ", \"lat\" : " + QString::number(latGPS) + ", \"lon\": " + QString::number(lonGPS) + "}";
     if (ws_opened == 1 && ws_m_collected == 1 && ws_o_collected == 1 && ws_g_collected == 1)
     {
         bs = m_webSocket.sendTextMessage(msg);
         ws_m_collected = 0; ws_o_collected = 0; ws_g_collected = 0;
-        writeToTerminal("Message send, bytes send: " + QString::number(bs));
+        ui -> dashTerminal -> append("WEBSOCKET \nBytes send: " + QString::number(bs) + ".\n");
     }
+}
+
+void mainwindow::init_WebSocket_connection()
+{
+    m_webSocket.open(QUrl(QStringLiteral("ws://78.47.18.15:5000")));
+    connect(&m_webSocket, &QWebSocket::connected, this, &mainwindow::ws_onConnected);
 }

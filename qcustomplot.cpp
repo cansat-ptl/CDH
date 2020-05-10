@@ -14762,7 +14762,7 @@ void QCustomPlot::paintEvent(QPaintEvent *event)
   Event handler for a resize of the QCustomPlot widget. The viewport (which becomes the outer rect
   of mPlotLayout) is resized appropriately. Finally a \ref replot is performed.
 */
-void QCustomPlot::resizeEvent(QResizeEvent *event)
+void QCustomPlot::td_resizeEvent(QResizeEvent *event)
 {
   Q_UNUSED(event)
   // resize and repaint the buffer:

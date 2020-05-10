@@ -43,7 +43,7 @@
         </property>
         <layout class="QHBoxLayout" name="mainHorizLayout">
          <item>
-          <widget class="QFrame" name="frame">
+          <widget class="QFrame" name="dFrame2">
            <property name="frameShape">
             <enum>QFrame::Box</enum>
            </property>
@@ -267,7 +267,7 @@
         </property>
         <layout class="QHBoxLayout" name="orientHorizLayout">
          <item>
-          <widget class="QFrame" name="frame">
+          <widget class="QFrame" name="dFrame3">
            <property name="frameShape">
             <enum>QFrame::Box</enum>
            </property>
@@ -452,7 +452,7 @@
         </property>
         <layout class="QHBoxLayout" name="gpsHorizLayout">
          <item>
-          <widget class="QFrame" name="frame">
+          <widget class="QFrame" name="dFrame1">
            <property name="frameShape">
             <enum>QFrame::Box</enum>
            </property>
@@ -662,7 +662,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QFrame" name="formFrame">
+    <widget class="QFrame" name="mFormFrame2">
      <property name="geometry">
       <rect>
        <x>1290</x>
@@ -1840,7 +1840,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QFrame" name="formFrame">
+    <widget class="QFrame" name="mFormFrame1">
      <property name="geometry">
       <rect>
        <x>1290</x>

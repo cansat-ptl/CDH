@@ -3808,7 +3808,7 @@ protected:
   virtual QSize minimumSizeHint() const Q_DECL_OVERRIDE;
   virtual QSize sizeHint() const Q_DECL_OVERRIDE;
   virtual void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
-  virtual void resizeEvent(QResizeEvent *event) Q_DECL_OVERRIDE;
+  virtual void td_resizeEvent(QResizeEvent *event) Q_DECL_OVERRIDE;
   virtual void mouseDoubleClickEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
   virtual void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
   virtual void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;

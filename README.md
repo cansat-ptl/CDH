@@ -1,6 +1,3 @@
-# guys it's bullshit i will rewrite everything here
-# btw it works perfectly
-# btw the code is still bullshit
 # CanSat Data Handler
 Created by Anatoly Antonov ( https://github.com/awend0 ) for the 9th Moscow State University Aerospace Engineering School 2020 (http://roscansat.com)
 
@@ -12,4 +9,4 @@ Created by Anatoly Antonov ( https://github.com/awend0 ) for the 9th Moscow Stat
 created using Qt 5.14.0 and Qt Creator 4.11.0 & build using MinGW 7.3.0 64-bit
 
 started Jan'20
-
+i know tht code is bullshit but it works perfectly
